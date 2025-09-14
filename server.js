@@ -55,7 +55,9 @@ const corsOptions = {
       process.env.FRONTEND_URL || 'http://localhost:5174',
       'http://localhost:3000',
       'http://localhost:5173',
-      'http://localhost:5174'
+      'http://localhost:5174',
+      'https://myportfolio-six-steel-86.vercel.app',
+      'https://myportfolio-frontend-blond.vercel.app'
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -128,25 +130,28 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Start server with port fallback
-const startServer = (port) => {
-  const server = app.listen(port)
-    .on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} is busy, trying ${port + 1}...`);
-        startServer(port + 1);
-      } else {
-        console.error('Server error:', err);
-      }
-    })
-    .on('listening', () => {
-      const actualPort = server.address().port;
-      console.log(`🚀 Server running on port ${actualPort}`);
-      console.log(`📧 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5174'}`);
-    });
-};
+if (process.env.NODE_ENV !== 'production') {
+  // Only use the port listening code in development
+  const startServer = (port) => {
+    const server = app.listen(port)
+      .on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          console.log(`Port ${port} is busy, trying ${port + 1}...`);
+          startServer(port + 1);
+        } else {
+          console.error('Server error:', err);
+        }
+      })
+      .on('listening', () => {
+        const actualPort = server.address().port;
+        console.log(`🚀 Server running on port ${actualPort}`);
+        console.log(`📧 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5174'}`);
+      });
+  };
 
-startServer(PORT);
+  startServer(PORT);
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
